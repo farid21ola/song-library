@@ -1,0 +1,2 @@
+env: "local"
+connection_string: "postgres://postgres:admin@localhost:5432/sso?sslmode=disable"
