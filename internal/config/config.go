@@ -1,8 +1,8 @@
 package config
 
 import (
-	"flag"
 	"github.com/ilyakaznacheev/cleanenv"
+	"github.com/joho/godotenv"
 	"os"
 )
 
@@ -12,6 +12,11 @@ type Config struct {
 }
 
 func MustLoad() *Config {
+	err := godotenv.Load()
+	if err != nil {
+		panic("error loading .env file")
+	}
+
 	path := fetchConfigPath()
 	if path == "" {
 		panic("config path is empty")
@@ -37,12 +42,7 @@ func MustLoadByPath(path string) *Config {
 func fetchConfigPath() string {
 	var res string
 
-	flag.StringVar(&res, "config", "", " path to config file")
-	flag.Parse()
-
-	if res == "" {
-		res = os.Getenv("CONFIG_PATH")
-	}
+	res = os.Getenv("CONFIG_PATH")
 
 	return res
 }
