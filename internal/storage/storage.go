@@ -12,11 +12,12 @@ type Storage interface {
 	DeleteSong(ctx context.Context, artist, title string) error
 	UpdateSong(ctx context.Context, song *Song) error
 	AddSong(ctx context.Context, song *Song) error
+	GetSong(ctx context.Context, artist, title string) (*Song, error)
 }
 
 var (
-	ErrNoSavedPages = errors.New("no saved pages")
 	ErrSongNotFound = errors.New("song not found")
+	ErrSongExists   = errors.New("song exists")
 )
 
 type Song struct {
