@@ -2,15 +2,21 @@ package main
 
 import (
 	"log/slog"
+	"net/http"
 	"os"
-	"song-library/internal/http-server/handlers/info"
-	"song-library/internal/lib/logger/sl"
+	"song-library/internal/http-server/handlers/songs/add"
+	"song-library/internal/http-server/handlers/songs/delete"
+	"song-library/internal/http-server/handlers/songs/update"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
 	"song-library/internal/config"
+	"song-library/internal/http-server/handlers/info"
+	getSongs "song-library/internal/http-server/handlers/songs/get"
+	getLyrics "song-library/internal/http-server/handlers/songs/lyrics/get"
 	mwLogger "song-library/internal/http-server/middleware/logger"
+	"song-library/internal/lib/logger/sl"
 	"song-library/internal/lib/logger/slogpretty"
 	"song-library/internal/storage/postgres"
 )
@@ -35,28 +41,40 @@ func main() {
 		os.Exit(1)
 	}
 
-	_ = storage
-
 	log.Info("storage connected")
 
 	router := chi.NewRouter()
 
 	router.Use(middleware.RequestID)
-	router.Use(mwLogger.New(log))
+	router.Use(mwLogger.New(log)) // TODO: fix pretty middleware logger
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
 
 	router.Route("/songs", func(r chi.Router) {
-		r.Get("/", handlers.GetSongs)                         // Получение списка песен с фильтрацией и пагинацией
-		r.Get("/{artist}/{title}/lyrics", handlers.GetLyrics) // Получение текста песни с пагинацией по куплетам
-		r.Delete("/{artist}/{title}", handlers.DeleteSong)    // Удаление песни
-		r.Put("/{artist}/{title}", handlers.UpdateSong)       // Изменение данных песни
-		r.Post("/", handlers.AddSong)                         // Добавление новой песни
+		r.Get("/", getSongs.New(log, storage))        // Список песен с фильтрацией и пагинацией
+		r.Get("/lyrics", getLyrics.New(log, storage)) // Текст песни с пагинацией
+		r.Delete("/", delete.New(log, storage))       // Удаление песни
+		r.Put("/", update.New(log, storage))          // Изменение данных песни
+		r.Post("/", add.New(log, storage))            // Добавление новой песни
 	})
 
 	router.Get("/info", info.New(log, storage))
 
-	//ToDo: server
+	log.Info("starting server", slog.String("address", cfg.Address))
+
+	srv := &http.Server{
+		Addr:         cfg.Address,
+		Handler:      router,
+		ReadTimeout:  cfg.HTTPServer.Timeout,
+		WriteTimeout: cfg.HTTPServer.Timeout,
+		IdleTimeout:  cfg.HTTPServer.IdleTimeout,
+	}
+
+	if err := srv.ListenAndServe(); err != nil {
+		log.Error("failed to start server")
+	}
+
+	log.Error("server stopped")
 }
 
 func setupLogger(env string) *slog.Logger {
