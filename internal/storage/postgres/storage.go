@@ -75,10 +75,10 @@ func (s *Storage) GetSongs(ctx context.Context, filter *map[string]string, limit
 func (s *Storage) GetSongLyrics(ctx context.Context, artist, title string, limit, offset int) (string, error) {
 	const op = "storage.postgres.GetSongLyrics"
 
-	query := "SELECT lyrics FROM songs WHERE artist = $1 AND  title = $2" // LIMIT $3 OFFSET $4
+	query := "SELECT lyrics FROM songs WHERE artist = $1 AND  title = $2"
 
 	var lyrics string
-	err := s.db.QueryRow(ctx, query, artist, title, limit, offset).Scan(&lyrics)
+	err := s.db.QueryRow(ctx, query, artist, title).Scan(&lyrics)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return "", storage.ErrSongNotFound
@@ -86,7 +86,7 @@ func (s *Storage) GetSongLyrics(ctx context.Context, artist, title string, limit
 		return "", fmt.Errorf("%s execute statement: %w", op, err)
 	}
 
-	verses := strings.Split(lyrics, "\n\n")
+	verses := strings.Split(lyrics, "\\n\\n")
 	if offset >= len(verses) {
 		return "", nil
 	}
@@ -96,7 +96,7 @@ func (s *Storage) GetSongLyrics(ctx context.Context, artist, title string, limit
 		end = len(verses)
 	}
 
-	return strings.Join(verses[offset:end], "\n\n"), nil
+	return strings.Join(verses[offset:end], "\\n\\n"), nil
 }
 
 func (s *Storage) DeleteSong(ctx context.Context, artist, title string) error {
@@ -148,7 +148,7 @@ func (s *Storage) GetSong(ctx context.Context, artist, title string) (*storage.S
 	query := "SELECT * FROM songs WHERE artist = $1 AND  title = $2"
 
 	var song storage.Song
-	err := s.db.QueryRow(ctx, query, artist, title).Scan(&song)
+	err := s.db.QueryRow(ctx, query, artist, title).Scan(&song.Artist, &song.Title, &song.ReleaseDate, &song.Lyrics, &song.Link)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, storage.ErrSongNotFound
