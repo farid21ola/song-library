@@ -22,7 +22,7 @@ type SongSaver interface {
 	AddSong(ctx context.Context, song *storage.Song) error
 }
 
-// @Summary addSong
+// @Summary Add song
 // @Description The request contains details about the song, including the artist's name, song title, release date, lyrics, and a link.
 // @Accept  json
 // @Tags songs

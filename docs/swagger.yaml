@@ -1,8 +1,9 @@
 basePath: /
 definitions:
-  get.Lyrics:
+  models.Lyrics:
     properties:
       text:
+        example: Ooh baby, don't you know...
         type: string
     type: object
   models.Song:
@@ -26,7 +27,7 @@ definitions:
     - group
     - song
     type: object
-  models.SongInfo:
+  models.SongDetail:
     properties:
       link:
         example: https://www.youtube.com/watch?v=Xsp3_a-PMTw
@@ -78,7 +79,7 @@ paths:
         "200":
           description: Song details
           schema:
-            $ref: '#/definitions/models.SongInfo'
+            $ref: '#/definitions/models.SongDetail'
         "404":
           description: Not Found - Song not found
           schema:
@@ -87,7 +88,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
-      summary: GetSongInfo
+      summary: Get song detail
       tags:
       - songs
   /songs:
@@ -168,7 +169,7 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/resp.Response'
-      summary: addSong
+      summary: Add song
       tags:
       - songs
     put:
@@ -282,7 +283,7 @@ paths:
         "200":
           description: Song lyrics successfully retrieved
           schema:
-            $ref: '#/definitions/get.Lyrics'
+            $ref: '#/definitions/models.Lyrics'
         "400":
           description: Bad Request - Missing required parameters
           schema:

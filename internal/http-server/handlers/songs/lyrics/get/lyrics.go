@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 	"net/http"
+	"song-library/internal/models"
 	"strconv"
 
 	"github.com/go-chi/render"
@@ -11,10 +12,6 @@ import (
 	"song-library/internal/lib/api/resp"
 	"song-library/internal/lib/logger/sl"
 )
-
-type Lyrics struct {
-	Text string `json:"text,omitempty"`
-}
 
 type LyricsGetter interface {
 	GetSongLyrics(ctx context.Context, artist, title string, limit, offset int) (string, error)
@@ -29,7 +26,7 @@ type LyricsGetter interface {
 // @Param song query string true "Song Title" Example("Hey Jude")
 // @Param limit query int false "Limit the number of lyrics lines to retrieve" Default(10)
 // @Param offset query int false "Offset for pagination" Default(0)
-// @Success 200 {object} Lyrics "Song lyrics successfully retrieved"
+// @Success 200 {object} models.Lyrics "Song lyrics successfully retrieved"
 // @Failure 400 {object} resp.Response "Bad Request - Missing required parameters"
 // @Failure 500 {object} resp.Response "Internal Server Error"
 // @Router /songs/lyrics [get]
@@ -63,6 +60,6 @@ func New(log *slog.Logger, lyricsGetter LyricsGetter) http.HandlerFunc {
 			return
 		}
 
-		render.JSON(w, r, Lyrics{Text: lyrics})
+		render.JSON(w, r, models.Lyrics{Text: lyrics})
 	}
 }

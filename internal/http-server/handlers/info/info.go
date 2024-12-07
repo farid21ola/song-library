@@ -24,14 +24,14 @@ type SongGetter interface {
 	GetSong(ctx context.Context, artist string, title string) (*storage.Song, error)
 }
 
-// @Summary GetSongInfo
+// @Summary Get song detail
 // @Description Fetches the details of a song given an artist's name and song title.
 // @Tags songs
 // @Accept  json
 // @Produce  json
 // @Param group query string true "Artist/group Name"
 // @Param song query string true "Song Title"
-// @Success 200 {object} models.SongInfo "Song details"
+// @Success 200 {object} models.SongDetail "Song details"
 // @Failure 404 {object} resp.Response "Bad request"
 // @Failure 404 {object} resp.Response "Not Found - Song not found"
 // @Failure 500 {object} resp.Response "Internal Server Error"
@@ -80,7 +80,7 @@ func New(log *slog.Logger, songGetter SongGetter) http.HandlerFunc {
 			slog.String("title", title),
 		)
 
-		songInfo := models.SongInfo{
+		songInfo := models.SongDetail{
 			ReleaseDate: song.ReleaseDate.Format("02.01.2006"),
 			Text:        song.Lyrics,
 			Link:        song.Link,

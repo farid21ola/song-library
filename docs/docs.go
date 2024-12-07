@@ -30,7 +30,7 @@ const docTemplate = `{
                 "tags": [
                     "songs"
                 ],
-                "summary": "GetSongInfo",
+                "summary": "Get song detail",
                 "parameters": [
                     {
                         "type": "string",
@@ -51,7 +51,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Song details",
                         "schema": {
-                            "$ref": "#/definitions/models.SongInfo"
+                            "$ref": "#/definitions/models.SongDetail"
                         }
                     },
                     "404": {
@@ -197,7 +197,7 @@ const docTemplate = `{
                 "tags": [
                     "songs"
                 ],
-                "summary": "addSong",
+                "summary": "Add song",
                 "parameters": [
                     {
                         "description": "Song info",
@@ -286,7 +286,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Song lyrics successfully retrieved",
                         "schema": {
-                            "$ref": "#/definitions/get.Lyrics"
+                            "$ref": "#/definitions/models.Lyrics"
                         }
                     },
                     "400": {
@@ -365,11 +365,12 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "get.Lyrics": {
+        "models.Lyrics": {
             "type": "object",
             "properties": {
                 "text": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Ooh baby, don't you know..."
                 }
             }
         },
@@ -402,7 +403,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.SongInfo": {
+        "models.SongDetail": {
             "type": "object",
             "properties": {
                 "link": {
