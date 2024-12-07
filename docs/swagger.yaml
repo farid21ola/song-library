@@ -1,0 +1,297 @@
+basePath: /
+definitions:
+  get.Lyrics:
+    properties:
+      text:
+        type: string
+    type: object
+  models.Song:
+    properties:
+      group:
+        example: Muse
+        type: string
+      link:
+        example: https://www.youtube.com/watch?v=Xsp3_a-PMTw
+        type: string
+      release_date:
+        example: 16.07.2006
+        type: string
+      song:
+        example: Supermassive Black Hole
+        type: string
+      text:
+        example: Ooh baby, don't you know...
+        type: string
+    required:
+    - group
+    - song
+    type: object
+  models.SongInfo:
+    properties:
+      link:
+        example: https://www.youtube.com/watch?v=Xsp3_a-PMTw
+        type: string
+      release_date:
+        example: 16.07.2006
+        type: string
+      text:
+        example: Ooh baby, don't you know I suffer?\nOoh baby, canyou hear me moan?\nYou
+          caught me under false pretenses\nHow long before you let me go?\n\nOoh\nYou
+          set my soul alight\nOoh\nYou set my soul alight
+        type: string
+    type: object
+  resp.Response:
+    properties:
+      erorr:
+        type: string
+      status:
+        type: string
+    type: object
+host: localhost:8082
+info:
+  contact:
+    name: Aliev Farid
+    url: https://github.com/farid21ola
+  description: API server for song library
+  title: Song library API
+  version: 0.0.1
+paths:
+  /info:
+    get:
+      consumes:
+      - application/json
+      description: Fetches the details of a song given an artist's name and song title.
+      parameters:
+      - description: Artist/group Name
+        in: query
+        name: group
+        required: true
+        type: string
+      - description: Song Title
+        in: query
+        name: song
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Song details
+          schema:
+            $ref: '#/definitions/models.SongInfo'
+        "404":
+          description: Not Found - Song not found
+          schema:
+            $ref: '#/definitions/resp.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.Response'
+      summary: GetSongInfo
+      tags:
+      - songs
+  /songs:
+    get:
+      consumes:
+      - application/json
+      description: Fetches a list of songs with optional filters for artist and song
+        title, and supports pagination via limit and offset.
+      parameters:
+      - description: Artist Name
+        example: '"The Beatles"'
+        in: query
+        name: group
+        type: string
+      - description: Song Title
+        example: '"Hey Jude"'
+        in: query
+        name: song
+        type: string
+      - default: 10
+        description: Limit of songs to retrieve
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset for pagination
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: A list of songs
+          schema:
+            items:
+              $ref: '#/definitions/models.Song'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.Response'
+      summary: Get a list of songs with optional filters and pagination.
+      tags:
+      - songs
+    post:
+      consumes:
+      - application/json
+      description: The request contains details about the song, including the artist's
+        name, song title, release date, lyrics, and a link.
+      parameters:
+      - description: Song info
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.Song'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Song successfully added
+          schema:
+            $ref: '#/definitions/resp.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/resp.Response'
+        "409":
+          description: Song already exists
+          schema:
+            $ref: '#/definitions/resp.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/resp.Response'
+      summary: addSong
+      tags:
+      - songs
+    put:
+      consumes:
+      - application/json
+      description: Updates the details of a song by artist and title. Only the fields
+        that are provided in the request body will be updated. Fields like lyrics,
+        release date, and link are optional.
+      parameters:
+      - description: 'New song info '
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.Song'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Song successfully updated
+          schema:
+            $ref: '#/definitions/resp.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.Response'
+        "404":
+          description: Not Found - Song not found
+          schema:
+            $ref: '#/definitions/resp.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.Response'
+      summary: Update song details by artist and title.
+      tags:
+      - songs
+  /songs/{group}/{song}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes the specified song by artist and title from the database.
+        Requires both "group" and "song" path parameters.
+      parameters:
+      - description: Artist Name
+        example: '"The Beatles"'
+        in: path
+        name: group
+        required: true
+        type: string
+      - description: Song Title
+        example: '"Hey Jude"'
+        in: path
+        name: song
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Song successfully deleted
+          schema:
+            $ref: '#/definitions/resp.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.Response'
+        "404":
+          description: Not Found - Song not found
+          schema:
+            $ref: '#/definitions/resp.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.Response'
+      summary: Delete a song by artist and title.
+      tags:
+      - songs
+  /songs/lyrics:
+    get:
+      consumes:
+      - application/json
+      description: Fetches lyrics of a song by artist and title with optional pagination
+        support for limit and offset.
+      parameters:
+      - description: Artist Name
+        example: '"The Beatles"'
+        in: query
+        name: group
+        required: true
+        type: string
+      - description: Song Title
+        example: '"Hey Jude"'
+        in: query
+        name: song
+        required: true
+        type: string
+      - default: 10
+        description: Limit the number of lyrics lines to retrieve
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset for pagination
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Song lyrics successfully retrieved
+          schema:
+            $ref: '#/definitions/get.Lyrics'
+        "400":
+          description: Bad Request - Missing required parameters
+          schema:
+            $ref: '#/definitions/resp.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.Response'
+      summary: Get song lyrics with optional pagination.
+      tags:
+      - lyrics
+swagger: "2.0"

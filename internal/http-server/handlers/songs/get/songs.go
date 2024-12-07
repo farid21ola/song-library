@@ -2,19 +2,35 @@ package get
 
 import (
 	"context"
-	"github.com/go-chi/render"
 	"log/slog"
 	"net/http"
-	resp "song-library/internal/lib/api/response"
-	"song-library/internal/lib/logger/sl"
-	"song-library/internal/storage"
 	"strconv"
+
+	"song-library/internal/lib/api/resp"
+	"song-library/internal/lib/logger/sl"
+	"song-library/internal/models"
+	"song-library/internal/storage"
+
+	"github.com/go-chi/render"
 )
 
 type SongsGetter interface {
 	GetSongs(ctx context.Context, filter *map[string]string, limit, offset int) ([]*storage.Song, error)
 }
 
+// @Summary Get a list of songs with optional filters and pagination.
+// @Description Fetches a list of songs with optional filters for artist and song title, and supports pagination via limit and offset.
+// @Tags songs
+// @Accept  json
+// @Produce  json
+// @Param group query string false "Artist Name" Example("The Beatles")
+// @Param song query string false "Song Title" Example("Hey Jude")
+// @Param limit query int false "Limit of songs to retrieve" Default(10)
+// @Param offset query int false "Offset for pagination" Default(0)
+// @Success 200 {array} models.Song "A list of songs"
+// @Failure 400 {object} resp.Response "Bad Request"
+// @Failure 500 {object} resp.Response "Internal Server Error"
+// @Router /songs [get]
 func New(log *slog.Logger, songsGetter SongsGetter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
@@ -44,6 +60,22 @@ func New(log *slog.Logger, songsGetter SongsGetter) http.HandlerFunc {
 			return
 		}
 
-		render.JSON(w, r, songs)
+		response := formatSongs(songs)
+
+		render.JSON(w, r, response)
 	}
+}
+
+func formatSongs(songs []*storage.Song) []*models.Song {
+	formattedSongs := make([]*models.Song, len(songs))
+	for i, song := range songs {
+		formattedSongs[i] = &models.Song{
+			Artist:      song.Artist,
+			Title:       song.Title,
+			ReleaseDate: song.ReleaseDate.Format("02.01.2006"), // Форматирование даты
+			Text:        song.Lyrics,
+			Link:        song.Link,
+		}
+	}
+	return formattedSongs
 }

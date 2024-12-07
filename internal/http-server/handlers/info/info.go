@@ -5,9 +5,10 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
-	resp "song-library/internal/lib/api/response"
-	"song-library/internal/lib/logger/sl"
 
+	"song-library/internal/lib/api/resp"
+	"song-library/internal/lib/logger/sl"
+	"song-library/internal/models"
 	"song-library/internal/storage"
 
 	"github.com/go-chi/chi/v5/middleware"
@@ -19,17 +20,22 @@ type Request struct {
 	Title  string `json:"song" validate:"required"`
 }
 
-type Response struct {
-	//resp.Response
-	ReleaseDate string `json:"release_date,omitempty"`
-	Text        string `json:"text,omitempty"`
-	Link        string `json:"link,omitempty"`
-}
-
 type SongGetter interface {
 	GetSong(ctx context.Context, artist string, title string) (*storage.Song, error)
 }
 
+// @Summary GetSongInfo
+// @Description Fetches the details of a song given an artist's name and song title.
+// @Tags songs
+// @Accept  json
+// @Produce  json
+// @Param group query string true "Artist/group Name"
+// @Param song query string true "Song Title"
+// @Success 200 {object} models.SongInfo "Song details"
+// @Failure 404 {object} resp.Response "Bad request"
+// @Failure 404 {object} resp.Response "Not Found - Song not found"
+// @Failure 500 {object} resp.Response "Internal Server Error"
+// @Router /info [get]
 func New(log *slog.Logger, songGetter SongGetter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const op = "handlers.info.info.New"
@@ -74,12 +80,12 @@ func New(log *slog.Logger, songGetter SongGetter) http.HandlerFunc {
 			slog.String("title", title),
 		)
 
-		render.JSON(w, r, Response{
-			//Response:    resp.OK(),
+		songInfo := models.SongInfo{
 			ReleaseDate: song.ReleaseDate.Format("02.01.2006"),
 			Text:        song.Lyrics,
 			Link:        song.Link,
-		})
+		}
+		render.JSON(w, r, songInfo)
 
 	}
 }

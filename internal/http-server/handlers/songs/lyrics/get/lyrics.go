@@ -2,22 +2,37 @@ package get
 
 import (
 	"context"
-	"github.com/go-chi/render"
 	"log/slog"
 	"net/http"
-	resp "song-library/internal/lib/api/response"
-	"song-library/internal/lib/logger/sl"
 	"strconv"
+
+	"github.com/go-chi/render"
+
+	"song-library/internal/lib/api/resp"
+	"song-library/internal/lib/logger/sl"
 )
 
-type Response struct {
-	Lyrics string `json:"lyrics,omitempty"`
+type Lyrics struct {
+	Text string `json:"text,omitempty"`
 }
 
 type LyricsGetter interface {
 	GetSongLyrics(ctx context.Context, artist, title string, limit, offset int) (string, error)
 }
 
+// @Summary Get song lyrics with optional pagination.
+// @Description Fetches lyrics of a song by artist and title with optional pagination support for limit and offset.
+// @Tags lyrics
+// @Accept  json
+// @Produce  json
+// @Param group query string true "Artist Name" Example("The Beatles")
+// @Param song query string true "Song Title" Example("Hey Jude")
+// @Param limit query int false "Limit the number of lyrics lines to retrieve" Default(10)
+// @Param offset query int false "Offset for pagination" Default(0)
+// @Success 200 {object} Lyrics "Song lyrics successfully retrieved"
+// @Failure 400 {object} resp.Response "Bad Request - Missing required parameters"
+// @Failure 500 {object} resp.Response "Internal Server Error"
+// @Router /songs/lyrics [get]
 func New(log *slog.Logger, lyricsGetter LyricsGetter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
@@ -26,7 +41,7 @@ func New(log *slog.Logger, lyricsGetter LyricsGetter) http.HandlerFunc {
 
 		if artist == "" || title == "" {
 			w.WriteHeader(http.StatusBadRequest)
-			render.JSON(w, r, resp.Error("missing required parameters: group and song"))
+			render.JSON(w, r, resp.Error("missing required parameters"))
 			return
 		}
 
@@ -48,6 +63,6 @@ func New(log *slog.Logger, lyricsGetter LyricsGetter) http.HandlerFunc {
 			return
 		}
 
-		render.JSON(w, r, Response{Lyrics: lyrics})
+		render.JSON(w, r, Lyrics{Text: lyrics})
 	}
 }

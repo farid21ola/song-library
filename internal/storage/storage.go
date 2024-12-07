@@ -18,6 +18,7 @@ type Storage interface {
 var (
 	ErrSongNotFound = errors.New("song not found")
 	ErrSongExists   = errors.New("song exists")
+	NothingChanged  = errors.New("nothing changed")
 )
 
 type Song struct {

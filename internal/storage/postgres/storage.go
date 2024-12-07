@@ -104,9 +104,14 @@ func (s *Storage) DeleteSong(ctx context.Context, artist, title string) error {
 
 	query := `DELETE FROM songs WHERE artist = $1 AND title = $2`
 
-	_, err := s.db.Exec(ctx, query, artist, title)
+	res, err := s.db.Exec(ctx, query, artist, title)
 	if err != nil {
 		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	rowsAffected := res.RowsAffected()
+	if rowsAffected == 0 {
+		return storage.ErrSongNotFound
 	}
 
 	return nil
