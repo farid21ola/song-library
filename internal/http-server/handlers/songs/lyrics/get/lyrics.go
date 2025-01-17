@@ -60,6 +60,11 @@ func New(log *slog.Logger, lyricsGetter LyricsGetter) http.HandlerFunc {
 			return
 		}
 
+		log.Debug("song lyrics fetched",
+			slog.String("artist", artist),
+			slog.String("title", title),
+		)
+
 		render.JSON(w, r, models.Lyrics{Text: lyrics})
 	}
 }

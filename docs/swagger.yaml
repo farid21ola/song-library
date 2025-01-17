@@ -95,8 +95,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: Fetches a list of songs with optional filters for artist and song
-        title, and supports pagination via limit and offset.
+      description: Fetches a list of songs with optional filters for artist, song
+        title, release date, lyrics and link presence.
       parameters:
       - description: Artist Name
         example: '"The Beatles"'
@@ -107,6 +107,21 @@ paths:
         example: '"Hey Jude"'
         in: query
         name: song
+        type: string
+      - description: 'Release Date (single date or range: ''DD-MM-YYYY'' or ''DD-MM-YYYY,DD-MM-YYYY'')'
+        example: '"01-01-1970,31-12-1979"'
+        in: query
+        name: release_date
+        type: string
+      - description: Lyrics content or 'not_null' to filter songs with lyrics
+        example: '"love"'
+        in: query
+        name: lyrics
+        type: string
+      - description: Use 'not_null' to filter songs with links
+        example: '"not_null"'
+        in: query
+        name: link
         type: string
       - default: 10
         description: Limit of songs to retrieve

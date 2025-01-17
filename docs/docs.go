@@ -71,7 +71,7 @@ const docTemplate = `{
         },
         "/songs": {
             "get": {
-                "description": "Fetches a list of songs with optional filters for artist and song title, and supports pagination via limit and offset.",
+                "description": "Fetches a list of songs with optional filters for artist, song title, release date, lyrics and link presence.",
                 "consumes": [
                     "application/json"
                 ],
@@ -95,6 +95,27 @@ const docTemplate = `{
                         "example": "\"Hey Jude\"",
                         "description": "Song Title",
                         "name": "song",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "\"01-01-1970,31-12-1979\"",
+                        "description": "Release Date (single date or range: 'DD-MM-YYYY' or 'DD-MM-YYYY,DD-MM-YYYY')",
+                        "name": "release_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "\"love\"",
+                        "description": "Lyrics content or 'not_null' to filter songs with lyrics",
+                        "name": "lyrics",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "\"not_null\"",
+                        "description": "Use 'not_null' to filter songs with links",
+                        "name": "link",
                         "in": "query"
                     },
                     {

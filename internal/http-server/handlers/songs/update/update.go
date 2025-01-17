@@ -62,7 +62,7 @@ func New(log *slog.Logger, songUpdater SongUpdater) http.HandlerFunc {
 			return
 		}
 
-		log.Info("request body decoded", slog.Any("request", req))
+		log.Debug("request body decoded", slog.Any("request", req))
 
 		if err := validator.New().Struct(req); err != nil {
 			validateErr := err.(validator.ValidationErrors)
@@ -118,7 +118,7 @@ func New(log *slog.Logger, songUpdater SongUpdater) http.HandlerFunc {
 			return
 		}
 
-		log.Info("song updated",
+		log.Debug("song updated",
 			slog.String("artist", req.Artist),
 			slog.String("title", req.Title),
 		)

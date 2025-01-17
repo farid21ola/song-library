@@ -49,6 +49,8 @@ func New(log *slog.Logger, songGetter SongGetter) http.HandlerFunc {
 		title := r.URL.Query().Get("song")
 
 		if artist == "" || title == "" {
+			log.Debug("missing required parameters: group and song")
+
 			w.WriteHeader(http.StatusBadRequest)
 			render.JSON(w, r, resp.Error("missing required parameters: group and song"))
 			return
@@ -56,13 +58,10 @@ func New(log *slog.Logger, songGetter SongGetter) http.HandlerFunc {
 
 		song, err := songGetter.GetSong(r.Context(), artist, title)
 		if errors.Is(err, storage.ErrSongNotFound) {
-			log.Info("song not found",
-				slog.String("artist", artist),
-				slog.String("title", title),
-			)
+			log.Error("song not found", sl.Err(err))
 
-			w.WriteHeader(http.StatusInternalServerError)
-			render.JSON(w, r, resp.Error("internal error"))
+			w.WriteHeader(http.StatusNotFound)
+			render.JSON(w, r, resp.Error("song not found"))
 
 			return
 		}
@@ -75,7 +74,7 @@ func New(log *slog.Logger, songGetter SongGetter) http.HandlerFunc {
 			return
 		}
 
-		log.Info("song found",
+		log.Debug("song found",
 			slog.String("artist", artist),
 			slog.String("title", title),
 		)

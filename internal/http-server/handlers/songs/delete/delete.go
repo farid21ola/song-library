@@ -67,7 +67,7 @@ func New(log *slog.Logger, songRemover SongRemover) http.HandlerFunc {
 			return
 		}
 
-		log.Info("song deleted",
+		log.Debug("song deleted",
 			slog.String("artist", group),
 			slog.String("title", song),
 		)
